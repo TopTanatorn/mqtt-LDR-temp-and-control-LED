@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
+#include <SparkFun_APDS9960.h>
 #define LM73_ADDR 0x4D
 #define Light 36  
 
@@ -10,7 +11,8 @@ double temp=0;
 #define LED_ON   LOW
 #define LED_OFF  HIGH
 int sensorValue;
-
+SparkFun_APDS9960 apds = SparkFun_APDS9960();
+int isr_flag = 0;
 
 const char* ssid     = "Buzzlightyear"; // Change to yours
 const char* password = "@Top12345"; // Change to yours
@@ -32,10 +34,14 @@ const char led2 = 12;
 #define LDR_TOPIC    "room1/ldr"
 #define LED_TOPIC1     "room1/led1" /* 1=on, 0=off */
 #define LED_TOPIC2     "room1/led2" /* 1=on, 0=off */
+
+
 long lastMsg = 0;
 char msg[20];
 char tempC[20];
 char LDRC[20];
+
+
 float readTemperature() {
   Wire1.beginTransmission(LM73_ADDR);
   Wire1.write(0x00); // Temperature Data Register
@@ -138,6 +144,7 @@ void setup() {
   client.setCallback(receivedCallback); /* client received subscribed topic */
 
 }
+
 void loop() {
 
   if (!client.connected()) { /* try to reconnect */
@@ -151,11 +158,12 @@ void loop() {
   if (now - lastMsg > 3000) {
     lastMsg = now;
     temp = readTemperature();
+
     
     int val = analogRead(Light);    
     Serial.print("Temp:");
     Serial.println(temp);
-   Serial.println(val);
+    Serial.println(val);
     snprintf (tempC, 20, "%.2f", temp);
     snprintf (LDRC, 20, "%d", val);
     client.publish(TEMP_TOPIC, tempC); /* publish the message */
