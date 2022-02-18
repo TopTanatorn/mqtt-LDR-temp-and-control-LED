@@ -136,6 +136,8 @@ void setup() {
   /* set led as output to control led on-off */
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
+  digitalWrite(led1, LED_OFF);
+  digitalWrite(led2, LED_OFF);
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
